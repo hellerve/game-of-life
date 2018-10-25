@@ -1,0 +1,61 @@
+(load "github.com:hellerve/anima.carp/master/anima.carp")
+(use-all Anima Array)
+
+(def size 800)
+(def cell-size 10)
+(def arr-size (/ size cell-size))
+(def max-idx (* arr-size arr-size))
+
+(defn state []
+  (repeat max-idx
+          (fn [] (> (Random.random) 0.5))))
+
+; hardcode a glider
+;(defn state []
+;  (let-do [state (replicate max-idx &false)]
+;    (aset! &state (+ 1 arr-size) true)
+;    (aset! &state (+ 2 (* 2 arr-size)) true)
+;    (aset! &state (* 3 arr-size) true)
+;    (aset! &state (+ 1 (* 3 arr-size)) true)
+;    (aset! &state (+ 2 (* 3 arr-size)) true)
+;    (the (Array Bool) state)))
+
+(defn setup [rend] (framerate 20))
+
+(defn idx [arr x y]
+  @(nth arr (+ y (* x arr-size))))
+
+(defn get-neighbor-count [arr x y]
+  (let-do [count 0]
+    (for [i (- x 1) (+ x 2)]
+      (for [j (- y 1) (+ y 2)]
+        (when (and* (not (and (= i x) (= j y)))
+                    (> i -1)
+                    (> j -1)
+                    (< i arr-size)
+                    (< j arr-size))
+          (set! count (+ count
+                         (if (idx arr i j) 1 0))))))
+    count))
+
+(defn step [state]
+  (let-do [nstate (allocate (length &state))]
+    (for [x 0 arr-size]
+      (for [y 0 arr-size]
+        (let [neighbor-count (get-neighbor-count &state x y)]
+          (if (idx &state x y)
+            (aset! &nstate (+ y (* x arr-size))
+                           (or (= neighbor-count 2) (= neighbor-count 3)))
+            (aset! &nstate (+ y (* x arr-size)) (= neighbor-count 3))))))
+    nstate))
+
+(defn draw [rend state]
+  (do
+    (for [x 0 arr-size]
+      (for [y 0 arr-size]
+        (do
+          (color rend (if (idx &state x y) 0 255))
+          (rect rend (* x cell-size) (* y cell-size) cell-size cell-size))))
+    (step state)))
+
+(defsketch "Game of Life" size size setup draw state)
