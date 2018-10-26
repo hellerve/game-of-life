@@ -1,10 +1,12 @@
-(load "github.com:hellerve/anima.carp/master/anima.carp")
+(load "https://github.com/hellerve/anima.carp@master")
 (use-all Anima Array)
 
 (def size 800)
 (def cell-size 10)
 (def arr-size (/ size cell-size))
 (def max-idx (* arr-size arr-size))
+(def bg-col 220)
+(def fg-col 20)
 
 (defn state []
   (repeat max-idx
@@ -54,7 +56,7 @@
     (for [x 0 arr-size]
       (for [y 0 arr-size]
         (do
-          (color rend (if (idx &state x y) 0 255))
+          (color rend (if (idx &state x y) fg-col bg-col))
           (rect rend (* x cell-size) (* y cell-size) cell-size cell-size))))
     (step state)))
 
