@@ -10,7 +10,7 @@
 
 (defn state []
   (repeat max-idx
-          (fn [] (> (Random.random) 0.5))))
+          &(fn [] (> (Random.random) 0.5))))
 
 ; hardcode a glider
 ;(defn state []
@@ -25,7 +25,7 @@
 (defn setup [rend] (framerate 20))
 
 (defn idx [arr x y]
-  @(nth arr (+ y (* x arr-size))))
+  @(unsafe-nth arr (+ y (* x arr-size))))
 
 (defn get-neighbor-count [arr x y]
   (let-do [count 0]
